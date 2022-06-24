@@ -4,7 +4,7 @@ const { Hotel, User, Reservation } = require('../models');
 const makeReservation = async (req, res, next) => {   
    const { clientName, hotelName, dateReservation} = req.body;
     try {
-         const user = await User.findOne({ name: clientName });
+         const user = await User.findOne({ name: clientName.toLowerCase() });
          if (!user || user.length === 0) {
             await User.create({ name: clientName });
          }
@@ -12,7 +12,11 @@ const makeReservation = async (req, res, next) => {
          const hotel = await Hotel.findOne({ name: hotelName });
          if (!hotel || hotel.length === 0) {
             throw 'Invalid Hotel';            
-         }         
+         }  
+         
+         if (!dateReservation || dateReservation === '') {
+            throw 'Invalid Date';
+         }
 
          const result = await Reservation.create([
             {
@@ -22,11 +26,7 @@ const makeReservation = async (req, res, next) => {
             }
          ]);
 
-         console.log('result',result)
-
-         if (!dateReservation || dateReservation === '') {
-            throw 'Invalid Date';
-         }
+         await User.findOneAndUpdate({ _id: user._id }, { haveReservation: "teste"});
 
         return res.status(200).json(result);
     } catch (e) {      
@@ -48,7 +48,11 @@ const makeReservation = async (req, res, next) => {
       const hotel = await Hotel.findOne({ name: hotelName }, null, { session });
       if (!hotel || hotel.length === 0) {
          throw 'Invalid Hotel';            
-      }      
+      }     
+      
+      if (!dateReservation || dateReservation === '') {
+         throw 'Invalid Date';
+      }
 
       const result = await Reservation.create([
          {
@@ -56,11 +60,9 @@ const makeReservation = async (req, res, next) => {
             idHotel: hotel._id,
             dateReservation: dateReservation
          }
-      ], { session });    
-      
-      if (!dateReservation || dateReservation === '') {
-         throw 'Invalid Date';
-      }
+      ], { session });          
+     
+      await User.findOneAndUpdate({ _id: user._id }, { haveReservation: "teste"});
        
        await session.commitTransaction();
        return res.status(200).json(result);
@@ -88,10 +90,20 @@ const getReservations = async (req, res, next) => {
    res.status(200).json(reservations);
 };
 
+const deleteReservations = async (req, res, next ) => {
+   try {
+      await Reservation.deleteMany();
+      res.status(200).json({message: 'deletado'});
+   } catch (error) {
+      res.status(500).json({message: 'erro interno'});
+   }
+}  
+
 module.exports = {
    getUsers,
    getHotels,
    getReservations,
    makeReservation,
-   makeReservationWithTransaction
+   makeReservationWithTransaction,
+   deleteReservations
 }

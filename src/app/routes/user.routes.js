@@ -8,5 +8,6 @@ reservationRouter.post('/transaction', reservationController.makeReservationWith
 reservationRouter.get('/users', reservationController.getUsers);
 reservationRouter.get('/hotels', reservationController.getHotels);
 reservationRouter.get('/', reservationController.getReservations);
+reservationRouter.delete('/', reservationController.deleteReservations);
 
 module.exports = reservationRouter;

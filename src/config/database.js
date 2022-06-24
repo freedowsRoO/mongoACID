@@ -11,6 +11,7 @@ class Database {
       useNewUrlParser: true,
       useUnifiedTopology: true,     
       socketTimeoutMS: 100000,
+      directConnection:true
     };
   }
 
